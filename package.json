@@ -1,0 +1,30 @@
+{
+  "name": "@gurbano/smartset",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "docs": "typedoc",
+    "release": "npm run build && npm version patch && npm publish --access public"
+  },
+  "keywords": [
+    "set",
+    "typescript",
+    "comparator",
+    "functional",
+    "immutable"
+  ],
+  "author": "Giovanni Urbano",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^20.0.0",
+    "@vitest/ui": "^1.0.0",
+    "ts-node": "^10.0.0",
+    "typedoc": "^0.28.7",
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0"
+  }
+}

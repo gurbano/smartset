@@ -1,0 +1,9 @@
+{
+  "entryPoints": ["src/SmartSet.ts"],
+  "out": "docs/api",
+  "excludePrivate": true,
+  "excludeInternal": true,
+  "excludeExternals": true,
+  "readme": "README.md",
+  "tsconfig": "tsconfig.json"
+}

@@ -1,0 +1,6 @@
+src/
+tests/
+.github/
+*.test.ts
+vite.config.ts
+vitest.config.ts

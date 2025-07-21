@@ -1,0 +1,33 @@
+name: Deploy Docs to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install deps
+        run: npm ci
+
+      - name: Build typedoc
+        run: npm run docs
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/api
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - run: |
+          mkdir dist
+          cp -r docs/* dist/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+      - uses: actions/deploy-pages@v4
