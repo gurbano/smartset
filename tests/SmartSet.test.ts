@@ -1,22 +1,29 @@
-
 import { SmartSet } from '../src/SmartSet';
 
 type User = { id: number; name: string };
-const cmp = (a: User, b: User) => a.id === b.id;
+const keyById = (u: User) => u.id;
+const keyByName = (u: User) => u.name;
 
 describe('SmartSet', () => {
 
   // 🟢 Metodi di base del Set
   describe('Metodi base', () => {
     it('add + size', () => {
-      const set = new SmartSet<User>(cmp);
+      const set = new SmartSet<User>(keyById);
       set.add({ id: 1, name: 'Alice' });
       set.add({ id: 1, name: 'Alicia' }); // Duplicato
       expect(set.size).toBe(1);
     });
 
+    it('add + size', () => {
+      const set = new SmartSet<User>(keyByName);
+      set.add({ id: 1, name: 'Alice' });
+      set.add({ id: 2, name: 'Alice' }); // Duplicato
+      expect(set.size).toBe(1);
+    });
+
     it('delete', () => {
-      const set = new SmartSet<User>(cmp);
+      const set = new SmartSet<User>(keyById);
       set.add({ id: 1, name: 'Alice' });
       const deleted = set.delete({ id: 1, name: 'Alice' });
       expect(deleted).toBe(true);
@@ -24,14 +31,14 @@ describe('SmartSet', () => {
     });
 
     it('clear', () => {
-      const set = new SmartSet<User>(cmp);
+      const set = new SmartSet<User>(keyById);
       set.add({ id: 1, name: 'Alice' });
       set.clear();
       expect(set.size).toBe(0);
     });
 
     it('clone', () => {
-      const set = new SmartSet<User>(cmp);
+      const set = new SmartSet<User>(keyById);
       set.add({ id: 1, name: 'Alice' });
       const cloned = set.clone();
       expect(cloned.size).toBe(1);
@@ -39,14 +46,14 @@ describe('SmartSet', () => {
     });
 
     it('has', () => {
-      const set = new SmartSet<User>(cmp);
+      const set = new SmartSet<User>(keyById);
       set.add({ id: 1, name: 'Alice' });
       expect(set.has({ id: 1, name: 'Alicia' })).toBe(true);
     });
 
     it('isImmutable', () => {
-      const mut = new SmartSet<User>(cmp, true);
-      const immut = new SmartSet<User>(cmp, false);
+      const mut = new SmartSet<User>(keyById, true);
+      const immut = new SmartSet<User>(keyById, false);
       expect(mut.isImmutable()).toBe(false);
       expect(immut.isImmutable()).toBe(true);
     });
@@ -54,7 +61,7 @@ describe('SmartSet', () => {
 
   // 🔵 Metodi tipo Array
   describe('Metodi array-like', () => {
-    const set = new SmartSet<User>(cmp);
+    const set = new SmartSet<User>(keyById);
     set.add({ id: 1, name: 'Alice' }).add({ id: 2, name: 'Bob' });
 
     it('map', () => {
@@ -103,53 +110,51 @@ describe('SmartSet', () => {
 
   // 🟣 Metodi insiemistici
   describe('Operazioni insiemistiche', () => {
-    
-
     it('union', () => {
-      const a = SmartSet.fromArray([{ id: 1, name:'Alice'}, { id: 2, name:'Bob' }], cmp);
-      const b = SmartSet.fromArray([{ id: 2, name:'Alice' }, { id: 3, name:'Bob' }], cmp);
+      const a = SmartSet.fromArray([{ id: 1, name:'Alice'}, { id: 2, name:'Bob' }], keyById);
+      const b = SmartSet.fromArray([{ id: 2, name:'Alice' }, { id: 3, name:'Bob' }], keyById);
 
       const result = a.union(b);
       expect(result.toArray().length).toBe(3);
     });
 
     it('intersection', () => {
-      const a = SmartSet.fromArray([{ id: 1, name:'Alice'}, { id: 2, name:'Bob' }], cmp);
-      const b = SmartSet.fromArray([{ id: 2, name:'Alice' }, { id: 3, name:'Bob' }], cmp);
+      const a = SmartSet.fromArray([{ id: 1, name:'Alice'}, { id: 2, name:'Bob' }], keyById);
+      const b = SmartSet.fromArray([{ id: 2, name:'Alice' }, { id: 3, name:'Bob' }], keyById);
 
       const result = a.intersection(b);
       expect(result.toArray()).toEqual([{ id: 2, name:'Bob' }]);
     });
 
     it('difference', () => {
-      const a = SmartSet.fromArray([{ id: 1, name:'Alice'}, { id: 2, name:'Bob' }], cmp);
-      const b = SmartSet.fromArray([{ id: 2, name:'Alice' }, { id: 3, name:'Bob' }], cmp);
+      const a = SmartSet.fromArray([{ id: 1, name:'Alice'}, { id: 2, name:'Bob' }], keyById);
+      const b = SmartSet.fromArray([{ id: 2, name:'Alice' }, { id: 3, name:'Bob' }], keyById);
 
       const result = a.difference(b);
       expect(result.toArray()).toEqual([{ id: 1, name: "Alice", }]);
     });
 
     it('isSubsetOf / isSupersetOf', () => {
-      const a = SmartSet.fromArray([{ id: 1, name:'Alice'}, { id: 2, name:'Bob' }], cmp);
-      const b = SmartSet.fromArray([{ id: 2, name:'Alice' }, { id: 3, name:'Bob' }], cmp);
-      const sub = SmartSet.fromArray([{ id: 2, name:'Alice' }], cmp);
+      const a = SmartSet.fromArray([{ id: 1, name:'Alice'}, { id: 2, name:'Bob' }], keyById);
+      const b = SmartSet.fromArray([{ id: 2, name:'Alice' }, { id: 3, name:'Bob' }], keyById);
+      const sub = SmartSet.fromArray([{ id: 2, name:'Alice' }], keyById);
       expect(sub.isSubsetOf(a)).toBe(true);
       expect(a.isSupersetOf(sub)).toBe(true);
     });
 
     it('equals', () => {
-      const a = SmartSet.fromArray([{ id: 1, name:'Alice'}, { id: 2, name:'Bob' }], cmp);
-      const b = SmartSet.fromArray([{ id: 2, name:'Alice' }, { id: 3, name:'Bob' }], cmp);
-      const c = SmartSet.fromArray([{ id: 1, name:'Alice' }, { id: 2, name:'Alice' }], cmp);
+      const a = SmartSet.fromArray([{ id: 1, name:'Alice'}, { id: 2, name:'Bob' }], keyById);
+      const b = SmartSet.fromArray([{ id: 2, name:'Alice' }, { id: 3, name:'Bob' }], keyById);
+      const c = SmartSet.fromArray([{ id: 1, name:'Alice' }, { id: 2, name:'Alice' }], keyById);
       expect(a.equals(c)).toBe(true);
     });
   });
 
-  // 🟡 Comparator e immutabilità
-  describe('Comparator e immutabilità', () => {
+  // 🟡 Immutabilità
+  describe('Immutabilità', () => {
     it('add immutabile', () => {
-      const immut = new SmartSet<User>(cmp, false);
-      const result = immut.add({ id: 5, name: 'Zoe' })
+      const immut = new SmartSet<User>(keyById, false);
+      const result = (immut.add({ id: 5, name: 'Zoe' }) as SmartSet<User>)
         .add({ id: 5, name: 'Zoe' })
         .add({ id: 2, name: 'Zoe' });
       expect(immut.size).toBe(0);
@@ -157,13 +162,13 @@ describe('SmartSet', () => {
     });
 
     it('delete immutabile', () => {
-      const base = SmartSet.fromArray([{ id: 1, name:'Alice' }, { id: 2, name:'Bob' }, { id: 3, name:'Gino' }], cmp, false);
+      const base = SmartSet.fromArray([{ id: 1, name:'Alice' }, { id: 2, name:'Bob' }, { id: 3, name:'Gino' }], keyById, false);
       const result = base.delete({ id: 1, name:'Alice' });
       expect((result as SmartSet<User>).size).toBe(2);
     });
 
     it('clear immutabile', () => {
-      const base = SmartSet.fromArray([{ id: 1, name:'Alice' }, { id: 2, name:'Alice' }], cmp, false);
+      const base = SmartSet.fromArray([{ id: 1, name:'Alice' }, { id: 2, name:'Alice' }], keyById, false);
       const result = base.clear();
       expect((result as SmartSet<User>).size).toBe(0);
     });
@@ -172,7 +177,7 @@ describe('SmartSet', () => {
       const base = SmartSet.fromArray([
         { id: 2, name: 'B' },
         { id: 1, name: 'A' }
-      ], cmp, false);
+      ], keyById, false);
       const sorted = base.sortBy((a, b) => a.id - b.id);
       expect(sorted.toArray()[0].id).toBe(1);
     });

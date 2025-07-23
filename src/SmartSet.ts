@@ -1,41 +1,49 @@
-type Comparator<T> = (a: T, b: T) => boolean;
+type KeyFn<T> = (item: T) => string | number;
 
 export class SmartSet<T> {
   private items: T[] = [];
+  private indexMap: Map<string | number, number> = new Map();
 
   constructor(
-    private comparator: Comparator<T>,
+    private keyFn: KeyFn<T>,
     private mutable: boolean = true
   ) {}
 
   static fromArray<T>(
-  array: T[],
-  comparator: Comparator<T>,
-  mutable = true
-): SmartSet<T> {
-  return array.reduce(
-    (set, item) => set.add(item) as SmartSet<T>,
-    new SmartSet<T>(comparator, mutable)
-  );
-}
+    array: T[],
+    keyFn: KeyFn<T>,
+    mutable = true
+  ): SmartSet<T> {
+    return array.reduce(
+      (set, item) => set.add(item) as SmartSet<T>,
+      new SmartSet<T>(keyFn, mutable)
+    );
+  }
 
   isImmutable(): boolean {
     return !this.mutable;
   }
 
   clone(): SmartSet<T> {
-    return SmartSet.fromArray([...this.items], this.comparator, this.mutable);
+    const clone = new SmartSet<T>(this.keyFn, this.mutable);
+    clone.items = [...this.items];
+    clone.indexMap = new Map(this.indexMap);
+    return clone;
   }
-
 
   add(item: T, options?: { replace?: boolean; mutable?: boolean }): this | SmartSet<T> {
     const isMutable = options?.mutable ?? this.mutable;
     const target = isMutable ? this : this.clone();
-    const index = target.items.findIndex(existing => this.comparator(existing, item));
-    if (index === -1) {
+    const key = target.keyFn(item);
+
+    if (target.indexMap.has(key)) {
+      if (options?.replace) {
+        const idx = target.indexMap.get(key)!;
+        target.items[idx] = item;
+      }
+    } else {
       target.items.push(item);
-    } else if (options?.replace) {
-      target.items[index] = item;
+      target.indexMap.set(key, target.items.length - 1);
     }
     return target;
   }
@@ -43,10 +51,17 @@ export class SmartSet<T> {
   delete(item: T, options?: { mutable?: boolean }): boolean | SmartSet<T> {
     const isMutable = options?.mutable ?? this.mutable;
     const target = isMutable ? this : this.clone();
-    
-    const index = target.items.findIndex(existing => this.comparator(existing, item));
-    if (index !== -1) {
-      target.items.splice(index, 1);
+    const key = target.keyFn(item);
+
+    if (target.indexMap.has(key)) {
+      const idx = target.indexMap.get(key)!;
+      target.items.splice(idx, 1);
+      target.indexMap.delete(key);
+      // Aggiorna gli indici nella mappa dopo la rimozione
+      for (let i = idx; i < target.items.length; i++) {
+        const k = target.keyFn(target.items[i]);
+        target.indexMap.set(k, i);
+      }
       return isMutable ? true : target;
     }
     return isMutable ? false : target;
@@ -54,18 +69,30 @@ export class SmartSet<T> {
 
   clear(options?: { mutable?: boolean }): void | SmartSet<T> {
     const isMutable = options?.mutable ?? this.mutable;
-    return isMutable ? (this.items = []) as unknown as void : new SmartSet<T>(this.comparator, this.mutable);
+    if (isMutable) {
+      this.items = [];
+      this.indexMap.clear();
+      return;
+    } else {
+      return new SmartSet<T>(this.keyFn, this.mutable);
+    }
   }
 
   sortBy(compareFn: (a: T, b: T) => number, options?: { mutable?: boolean }): this | SmartSet<T> {
     const isMutable = options?.mutable ?? this.mutable;
     const target = isMutable ? this : this.clone();
     target.items.sort(compareFn);
+    // Ricostruisci la mappa degli indici
+    target.indexMap.clear();
+    target.items.forEach((item, idx) => {
+      target.indexMap.set(target.keyFn(item), idx);
+    });
     return target;
   }
 
   has(item: T): boolean {
-    return this.items.some(existing => this.comparator(existing, item));
+    const key = this.keyFn(item);
+    return this.indexMap.has(key);
   }
 
   get size(): number {
@@ -117,7 +144,7 @@ export class SmartSet<T> {
   }
 
   intersection(other: SmartSet<T>): SmartSet<T> {
-    const result = new SmartSet<T>(this.comparator, this.mutable);
+    const result = new SmartSet<T>(this.keyFn, this.mutable);
     for (const item of this) {
       if (other.has(item)) {
         result.add(item);
@@ -127,7 +154,7 @@ export class SmartSet<T> {
   }
 
   difference(other: SmartSet<T>): SmartSet<T> {
-    const result = new SmartSet<T>(this.comparator, this.mutable);
+    const result = new SmartSet<T>(this.keyFn, this.mutable);
     for (const item of this) {
       if (!other.has(item)) {
         result.add(item);

@@ -4,13 +4,13 @@
 [![Coverage](https://img.shields.io/badge/coverage-via--vitest-brightgreen)](https://vitest.dev/guide/coverage.html)
 [![npm version](https://badge.fury.io/js/@gurbano%2Fsmartset.svg)](https://www.npmjs.com/package/@gurbano/smartset)
 
-> A smart alternative to JavaScript's native `Set`, with custom comparators, array methods, immutability, and functional operations.
+> A smart alternative to JavaScript's native `Set`, with custom key functions, array methods, immutability, and functional operations.
 
 ---
 
 ## ✨ Features
 
-- 🔁 Custom comparator logic (`(a, b) => boolean`)
+- 🔑 Custom key function for identity (`(item) => string | number`)
 - 🔄 Mutable or immutable behavior per instance
 - 🎯 Set operations: `union`, `intersection`, `difference`, `equals`, etc.
 - 🧩 Supports array methods like `map`, `filter`, `reduce`, etc.
@@ -20,36 +20,39 @@
 
 ## 📦 Installation
 
+```sh
 npm install @gurbano/smartset
+```
 
 ---
 
 ## 🚀 Usage
 
 ```ts
-
 import { SmartSet } from '@gurbano/smartset';
 
 type User = { id: number, name: string };
 
-const comparator = (a: User, b: User) => a.id === b.id;
+// Use a key function to identify items
+const keyById = (u: User) => u.id;
 
-// Immutabile per default
-const users = new SmartSet<User>(comparator, false)
+// Immutable by default (set mutable = false)
+const users = new SmartSet<User>(keyById, false)
   .add({ id: 1, name: 'Alice' })
   .add({ id: 2, name: 'Bob' });
 
 console.log(users.size); // 2
 
 const filtered = users.filter(u => u.name.startsWith('A'));
+console.log(filtered); // [{ id: 1, name: 'Alice' }]
 ```
 
-
+---
 
 ## 🧠 API Highlights
 
 Construction:
-  new SmartSet<T>(comparator: (a, b) => boolean, mutable?: boolean)
+  new SmartSet<T>(keyFn: (item: T) => string | number, mutable?: boolean)
 
 Common Methods:
   - add(item, options?)         Adds item (optionally replace or override immutability)
@@ -75,14 +78,6 @@ Array-like Methods:
 
 npx vitest run
 npx vitest --coverage
-
----
-
-## 🛠️ Build & Publish
-
-npm run build
-npm version patch
-npm publish --access public
 
 ---
 
