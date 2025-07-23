@@ -30,5 +30,13 @@
     "typedoc": "^0.28.7",
     "typescript": "^5.0.0",
     "vitest": "^1.0.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gurbano/smartset.git"
+  },
+  "bugs": {
+    "url": "https://github.com/gurbano/smartset/issues"
+  },
+  "homepage": "https://github.com/gurbano/smartset#readme"
 }
