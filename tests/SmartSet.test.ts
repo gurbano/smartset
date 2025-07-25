@@ -22,6 +22,14 @@ describe('🟢 🔵 SmartSet 🟡 ⚫', () => {
       expect(set.size).toBe(1);
     });
 
+    it('add with replace', () => {
+      const set = new SmartSet<User>(keyById);
+      set.add({ id: 1, name: 'Alice' });
+      set.add({ id: 1, name: 'Alicia' }, { replace: true });
+      expect(set.size).toBe(1);
+      expect(set.toArray()[0].name).toBe('Alicia');
+    });
+
     it('delete', () => {
       const set = new SmartSet<User>(keyById);
       set.add({ id: 1, name: 'Alice' });
@@ -56,6 +64,32 @@ describe('🟢 🔵 SmartSet 🟡 ⚫', () => {
       const immut = new SmartSet<User>(keyById, false);
       expect(mut.isImmutable()).toBe(false);
       expect(immut.isImmutable()).toBe(true);
+    });
+
+    it('fromArray mutable', () => {
+      const arr = [
+        { id: 1, name: 'Alice' },
+        { id: 2, name: 'Bob' },
+        { id: 1, name: 'Alicia' } // duplicate id
+      ];
+      const set = SmartSet.fromArray(arr, keyById, true);
+      expect(set.size).toBe(2);
+      expect(set.isImmutable()).toBe(false);
+      expect(set.has({ id: 1, name: 'Alice' })).toBe(true);
+      expect(set.has({ id: 2, name: 'Bob' })).toBe(true);
+    });
+
+    it('fromArray immutable', () => {
+      const arr = [
+        { id: 1, name: 'Alice' },
+        { id: 2, name: 'Bob' },
+        { id: 1, name: 'Alicia' } // duplicate id
+      ];
+      const set = SmartSet.fromArray(arr, keyById, false);
+      expect(set.size).toBe(2);
+      expect(set.isImmutable()).toBe(true);
+      expect(set.has({ id: 1, name: 'Alice' })).toBe(true);
+      expect(set.has({ id: 2, name: 'Bob' })).toBe(true);
     });
   });
 
