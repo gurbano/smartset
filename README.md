@@ -3,7 +3,7 @@
 > A smart alternative to JavaScript's native `Set`, with custom key functions, array methods, immutability, and functional operations.
 
 [![CI](https://github.com/gurbano/smartset/actions/workflows/test.yml/badge.svg)](https://github.com/gurbano/smartset/actions/workflows/test.yml)
-[![Coverage](https://img.shields.io/badge/coverage-via--vitest-brightgreen)](https://vitest.dev/guide/coverage.html)
+[![Coverage](https://codecov.io/gh/gurbano/smartset/branch/main/graph/badge.svg)](https://codecov.io/gh/gurbano/smartset)
 [![npm version](https://badge.fury.io/js/@gurbano%2Fsmartset.svg)](https://www.npmjs.com/package/@gurbano/smartset)
 
 ---
@@ -119,7 +119,7 @@ Other:
   Returns `true` if immutable.
 - `[Symbol.iterator]()`  
   Enables iteration with `for...of`.
-  
+
 ## 🧪 Running tests
 
 npx vitest run
