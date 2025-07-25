@@ -4,21 +4,21 @@ type User = { id: number; name: string };
 const keyById = (u: User) => u.id;
 const keyByName = (u: User) => u.name;
 
-describe('SmartSet', () => {
+describe('🟢 🔵 SmartSet 🟡 ⚫', () => {
 
-  // 🟢 Metodi di base del Set
-  describe('Metodi base', () => {
+  //  Basic Set methods
+  describe('🟢 Basic methods', () => {
     it('add + size', () => {
       const set = new SmartSet<User>(keyById);
       set.add({ id: 1, name: 'Alice' });
-      set.add({ id: 1, name: 'Alicia' }); // Duplicato
+      set.add({ id: 1, name: 'Alicia' }); // Duplicate
       expect(set.size).toBe(1);
     });
 
     it('add + size', () => {
       const set = new SmartSet<User>(keyByName);
       set.add({ id: 1, name: 'Alice' });
-      set.add({ id: 2, name: 'Alice' }); // Duplicato
+      set.add({ id: 2, name: 'Alice' }); // Duplicate
       expect(set.size).toBe(1);
     });
 
@@ -59,8 +59,7 @@ describe('SmartSet', () => {
     });
   });
 
-  // 🔵 Metodi tipo Array
-  describe('Metodi array-like', () => {
+  describe('🔵 Array-like methods', () => {
     const set = new SmartSet<User>(keyById);
     set.add({ id: 1, name: 'Alice' }).add({ id: 2, name: 'Bob' });
 
@@ -108,8 +107,7 @@ describe('SmartSet', () => {
     });
   });
 
-  // 🟣 Metodi insiemistici
-  describe('Operazioni insiemistiche', () => {
+  describe('🟣 Set operations', () => {
     it('union', () => {
       const a = SmartSet.fromArray([{ id: 1, name:'Alice'}, { id: 2, name:'Bob' }], keyById);
       const b = SmartSet.fromArray([{ id: 2, name:'Alice' }, { id: 3, name:'Bob' }], keyById);
@@ -150,9 +148,8 @@ describe('SmartSet', () => {
     });
   });
 
-  // 🟡 Immutabilità
-  describe('Immutabilità', () => {
-    it('add immutabile', () => {
+  describe('🟡 Immutability', () => {
+    it('add immutable', () => {
       const immut = new SmartSet<User>(keyById, false);
       const result = (immut.add({ id: 5, name: 'Zoe' }) as SmartSet<User>)
         .add({ id: 5, name: 'Zoe' })
@@ -161,25 +158,139 @@ describe('SmartSet', () => {
       expect(result.size).toBe(2);
     });
 
-    it('delete immutabile', () => {
+    it('delete immutable', () => {
       const base = SmartSet.fromArray([{ id: 1, name:'Alice' }, { id: 2, name:'Bob' }, { id: 3, name:'Gino' }], keyById, false);
       const result = base.delete({ id: 1, name:'Alice' });
       expect((result as SmartSet<User>).size).toBe(2);
     });
 
-    it('clear immutabile', () => {
+    it('clear immutable', () => {
       const base = SmartSet.fromArray([{ id: 1, name:'Alice' }, { id: 2, name:'Alice' }], keyById, false);
       const result = base.clear();
       expect((result as SmartSet<User>).size).toBe(0);
     });
 
-    it('sortBy immutabile', () => {
+    it('sortBy immutable', () => {
       const base = SmartSet.fromArray([
         { id: 2, name: 'B' },
         { id: 1, name: 'A' }
       ], keyById, false);
       const sorted = base.sortBy((a, b) => a.id - b.id);
       expect(sorted.toArray()[0].id).toBe(1);
+    });
+  });
+
+  describe('🔴 Additional functional methods', () => {
+    const set = SmartSet.fromArray(
+      [
+        { id: 1, name: 'Alice' },
+        { id: 2, name: 'Bob' },
+        { id: 3, name: 'Alice' }
+      ],
+      keyById
+    );
+
+    it('flatMap', () => {
+      const result = set.flatMap(
+        (user) => [user.name, user.name.toUpperCase()],
+        (val) => val
+      );
+      expect(result.has('ALICE')).toBe(true);
+      expect(result.size).toBe(4);
+    });
+
+    it('groupBy', () => {
+      const groups = set.groupBy(user => user.name);
+      expect(groups['Alice']).toBeDefined();
+      expect(groups['Bob']).toBeDefined();
+      expect(groups['Alice'].size).toBe(2);
+    });
+
+    it('partition', () => {
+      const [startsWithA, others] = set.partition(user => user.name.startsWith('A'));
+      expect(startsWithA.size).toBe(2);
+      expect(others.size).toBe(1);
+    });
+
+    it('reject', () => {
+      const result = set.reject(user => user.name === 'Alice');
+      expect(result.size).toBe(1);
+      expect(result.toArray()[0].name).toBe('Bob');
+    });
+
+    it('uniqBy', () => {
+      const duplicatedSet = SmartSet.fromArray(
+        [
+          { id: 1, name: 'Alice' },
+          { id: 2, name: 'Alice' },
+          { id: 3, name: 'Bob' }
+        ],
+        keyById
+      );
+      const result = duplicatedSet.uniqBy(user => user.name);
+      expect(result.size).toBe(2);
+    });
+  });
+
+  describe('⚫ Additional set operators', () => {
+    it('symmetricDifference', () => {
+      const a = SmartSet.fromArray([{ id: 1, name: 'A' }, { id: 2, name: 'B' }], keyById);
+      const b = SmartSet.fromArray([{ id: 2, name: 'C' }, { id: 3, name: 'D' }], keyById);
+      const result = a.symmetricDifference(b);
+      expect(result.toArray()).toEqual([{ id: 1, name: 'A' }, { id: 3, name: 'D' }]);
+    });
+
+    it('withOnly', () => {
+      const base = SmartSet.fromArray([{ id: 1, name: 'A' }, { id: 2, name: 'B' }], keyById);
+      const filter = SmartSet.fromArray([{ id: 2, name: 'B' }], keyById);
+      const result = base.withOnly(filter);
+      expect(result.size).toBe(1);
+      expect(result.toArray()[0].id).toBe(2);
+    });
+
+    it('without', () => {
+      const base = SmartSet.fromArray([{ id: 1, name: 'A' }, { id: 2, name: 'B' }], keyById);
+      const exclude = SmartSet.fromArray([{ id: 1, name: 'A' }], keyById);
+      const result = base.without(exclude);
+      expect(result.size).toBe(1);
+      expect(result.toArray()[0].id).toBe(2);
+    });
+  });
+
+  describe('🟣 New set operators', () => {
+    it('overlaps', () => {
+      const a = SmartSet.fromArray([{ id: 1, name: 'A' }, { id: 2, name: 'B' }], keyById);
+      const b = SmartSet.fromArray([{ id: 2, name: 'C' }, { id: 3, name: 'D' }], keyById);
+      const c = SmartSet.fromArray([{ id: 4, name: 'E' }], keyById);
+
+      expect(a.overlaps(b)).toBe(true);  // share element with id=2
+      expect(a.overlaps(c)).toBe(false); // no common elements
+    });
+
+    it('xor (alias for symmetricDifference)', () => {
+      const a = SmartSet.fromArray([{ id: 1, name: 'A' }, { id: 2, name: 'B' }], keyById);
+      const b = SmartSet.fromArray([{ id: 2, name: 'B' }, { id: 3, name: 'C' }], keyById);
+
+      const result = a.xor(b);
+      expect(result.toArray()).toEqual([
+        { id: 1, name: 'A' },
+        { id: 3, name: 'C' }
+      ]);
+    });
+
+    it('filteredIntersection', () => {
+      const a = SmartSet.fromArray(
+        [{ id: 1, name: 'A' }, { id: 2, name: 'B' }, { id: 3, name: 'C' }],
+        keyById
+      );
+      const b = SmartSet.fromArray(
+        [{ id: 2, name: 'B' }, { id: 3, name: 'C' }],
+        keyById
+      );
+
+      const result = a.filteredIntersection(b, item => item.name === 'B');
+      expect(result.size).toBe(1);
+      expect(result.toArray()[0]).toEqual({ id: 2, name: 'B' });
     });
   });
 
