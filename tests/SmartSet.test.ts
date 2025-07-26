@@ -1,4 +1,4 @@
-import { SmartSet } from '../src/SmartSet';
+import { SmartSet } from '../src/SmartSet.js';
 
 type User = { id: number; name: string };
 const keyById = (u: User) => u.id;

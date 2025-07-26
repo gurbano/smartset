@@ -104,17 +104,20 @@ export class SmartSet<T> {
     const target = isMutable ? this : this.clone();
     const key = target.keyFn(item);
 
-    if (target.indexMap.has(key)) {
-      const idx = target.indexMap.get(key)!;
-      target.items.splice(idx, 1);
-      target.indexMap.delete(key);
-      for (let i = idx; i < target.items.length; i++) {
-        const k = target.keyFn(target.items[i]);
-        target.indexMap.set(k, i);
-      }
-      return isMutable ? true : target;
+    if (!target.indexMap.has(key)) return isMutable ? false : target;
+
+    const idx = target.indexMap.get(key)!;
+    const lastIdx = target.items.length - 1;
+
+    if (idx !== lastIdx) {
+      const lastItem = target.items[lastIdx];
+      target.items[idx] = lastItem;
+      target.indexMap.set(target.keyFn(lastItem), idx);
     }
-    return isMutable ? false : target;
+    target.items.pop();
+    target.indexMap.delete(key);
+
+    return isMutable ? true : target;
   }
 
   /**

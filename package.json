@@ -12,7 +12,8 @@
     "test": "vitest run",
     "coverage": "vitest run --coverage",
     "docs": "typedoc",
-    "release": "npm run build && npm version patch && npm publish --access public"
+    "release": "npm run build && npm version patch && npm publish --access public",
+    "benchmark": "ts-node --esm --transpile-only tests/benchmark.test.ts"
   },
   "keywords": [
     "set",

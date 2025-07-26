@@ -6,7 +6,12 @@
     "outDir": "dist",
     "strict": true,
     "esModuleInterop": true,
-    "moduleResolution": "node"
+    "moduleResolution": "bundler",
+    "paths": {
+      "@smartset/*": ["./src/*"]
+    },
+    "types": ["vitest", "./src/global.d.ts", "jest"]
   },
-  "include": ["src", "tests"]
+  "include": ["src", "tests", "tests/benchmark.test.ts"],
+  
 }
