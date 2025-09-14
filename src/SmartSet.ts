@@ -7,7 +7,7 @@ type KeyFn<T> = (item: T) => string | number;
  * SmartSet is a data structure that combines Set semantics with array methods.
  * It allows custom comparison via key functions and supports both mutable and immutable modes.
  */
-export class SmartSet<T> {
+export default class SmartSet<T> {
   private items: T[] = [];
   private indexMap: Map<string | number, number> = new Map();
 
